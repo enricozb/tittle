@@ -1,6 +1,7 @@
 use clap::{App, AppSettings, Arg, SubCommand};
 
 mod cmd;
+mod util;
 
 fn main() -> std::io::Result<()> {
   let matches = App::new("rot")
