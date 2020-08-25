@@ -53,10 +53,8 @@ fn copy<P: AsRef<Path>>(path: P, name: &str) -> Result<()> {
   Ok(())
 }
 
-pub fn track<P: AsRef<Path>>(path: P, name: Option<&str>, template: bool) -> Result<()> {
+pub fn track<P: AsRef<Path>>(path: P, name: Option<&str>, _template: bool) -> Result<()> {
   let path = path.as_ref();
-
-  println!("{} {:?} {}", path.display(), name, template);
 
   if !path.exists() {
     return err::err(format!("Path does not exist: '{}'", path.display()));
@@ -76,7 +74,6 @@ pub fn track<P: AsRef<Path>>(path: P, name: Option<&str>, template: bool) -> Res
   if config.dest.contains_key(&name) {
     return err::err(format!("The name '{}' is already being tracked", name));
   } else {
-    println!("Copying '{}' to '{}'", &path.display(), &name);
     copy(&path, &name)?;
 
     config

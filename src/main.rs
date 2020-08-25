@@ -1,9 +1,12 @@
 use anyhow::Result;
 use clap::{App, AppSettings, Arg, SubCommand};
+use std::env;
 
 mod cmd;
 mod config;
+mod diff;
 mod err;
+mod git;
 mod util;
 
 fn main() {
@@ -41,18 +44,28 @@ fn main() {
             .index(1),
         ),
     )
+    .subcommand(
+      SubCommand::with_name("sync").about("sync between remote and local dotfiles"),
+    )
     .get_matches();
 
   let run = || -> Result<()> {
     config::init()?;
+    git::init()?;
 
-    if let Some(matches) = matches.subcommand_matches("track") {
-      cmd::track::track(
+    match matches.subcommand() {
+      ("track", Some(matches)) => cmd::track::track(
         matches.value_of("PATH").unwrap(),
         matches.value_of("name"),
         matches.is_present("template"),
-      )?
+      )?,
+
+      ("sync", _) => cmd::sync::sync()?,
+
+      _ => {}
     }
+
+    git::commit(&env::args().collect::<Vec<String>>()[1..].join(" "))?;
 
     Ok(())
   };
