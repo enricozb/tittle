@@ -1,6 +1,8 @@
+use anyhow::Result;
 use clap::{App, AppSettings, Arg, SubCommand};
 
 mod cmd;
+mod config;
 mod err;
 mod util;
 
@@ -41,13 +43,13 @@ fn main() {
     )
     .get_matches();
 
-  let run = || -> std::io::Result<()> {
-    cmd::config::init()?;
+  let run = || -> Result<()> {
+    config::init()?;
 
     if let Some(matches) = matches.subcommand_matches("track") {
       cmd::track::track(
         matches.value_of("PATH").unwrap(),
-        matches.value_of("NAME"),
+        matches.value_of("name"),
         matches.is_present("template"),
       )?
     }

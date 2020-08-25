@@ -1,7 +1,9 @@
+use anyhow::Result;
+
 use std::{
   collections::HashMap,
   env, fs,
-  io::{prelude::*, Result},
+  io::prelude::*,
   path::{self, Path},
 };
 
@@ -17,6 +19,7 @@ pub struct OverrideConfig {
 
 #[derive(Serialize, Deserialize)]
 pub struct Config {
+  pub repo: Option<String>,
   pub dest: HashMap<String, String>,
   pub overrides: HashMap<String, OverrideConfig>,
 }
@@ -49,6 +52,7 @@ fn create_config_if_not_exists() -> Result<()> {
   let config_file = rot_config_file();
   if !config_file.exists() {
     let config = Config {
+      repo: None,
       dest: HashMap::new(),
       overrides: HashMap::new(),
     };
@@ -85,5 +89,7 @@ pub fn write_config(config: &Config) -> Result<()> {
     fs::File::create(&config_file)?,
     "{}",
     serde_json::to_string_pretty(&config)?
-  )
+  )?;
+
+  Ok(())
 }
