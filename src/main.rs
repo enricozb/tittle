@@ -1,9 +1,10 @@
 use clap::{App, AppSettings, Arg, SubCommand};
 
 mod cmd;
+mod err;
 mod util;
 
-fn main() -> std::io::Result<()> {
+fn main() {
   let matches = App::new("rot")
     .version("0.0.1")
     .author("Enrico Z. Borba <enricozb@gmail.com>")
@@ -40,11 +41,21 @@ fn main() -> std::io::Result<()> {
     )
     .get_matches();
 
-  cmd::config::init()?;
+  let run = || -> std::io::Result<()> {
+    cmd::config::init()?;
 
-  if let Some(_) = matches.subcommand_matches("track") {
-    cmd::track::track();
+    if let Some(matches) = matches.subcommand_matches("track") {
+      cmd::track::track(
+        matches.value_of("PATH").unwrap(),
+        matches.value_of("NAME"),
+        matches.is_present("template"),
+      )?
+    }
+
+    Ok(())
+  };
+
+  if let Err(err) = run() {
+    util::error(err);
   }
-
-  Ok(())
 }

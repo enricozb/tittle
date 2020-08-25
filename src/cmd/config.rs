@@ -10,60 +10,80 @@ use serde::{Deserialize, Serialize};
 use crate::util;
 
 #[derive(Serialize, Deserialize)]
-struct OverrideConfig {
-  dest: HashMap<String, String>,
-  vars: HashMap<String, String>,
+pub struct OverrideConfig {
+  pub dest: HashMap<String, String>,
+  pub vars: HashMap<String, String>,
 }
 
 #[derive(Serialize, Deserialize)]
-struct Config {
-  dest: HashMap<String, String>,
-  custom: HashMap<String, OverrideConfig>,
+pub struct Config {
+  pub dest: HashMap<String, String>,
+  pub overrides: HashMap<String, OverrideConfig>,
 }
 
-fn config_dir() -> path::PathBuf {
-  if let Ok(config_dir) = env::var("XDG_CONFIG_HOME") {
-    return Path::new(&config_dir).join("rot");
+pub fn user_config_dir() -> path::PathBuf {
+  if let Ok(user_config_dir) = env::var("XDG_CONFIG_HOME") {
+    return Path::new(&user_config_dir).to_path_buf();
   }
 
-  Path::new(&env::var("HOME").unwrap())
-    .join(".config")
-    .join("rot")
+  Path::new(&env::var("HOME").unwrap()).join(".config")
 }
 
-fn config_json() -> path::PathBuf {
-  config_dir().join("rot_config.json")
+pub fn rot_config_dir() -> path::PathBuf {
+  user_config_dir().join("rot")
+}
+
+fn rot_config_file() -> path::PathBuf {
+  rot_config_dir().join("rot_config.json")
 }
 
 fn create_config_dir_if_not_exists() -> Result<()> {
-  let config_dir = config_dir();
-  if !config_dir.exists() {
-    fs::create_dir(&config_dir)?;
+  let rot_config_dir = rot_config_dir();
+  if !rot_config_dir.exists() {
+    fs::create_dir(&rot_config_dir)?;
   }
   Ok(())
 }
 
 fn create_config_if_not_exists() -> Result<()> {
-  let config_json = config_json();
-  if !config_json.exists() {
+  let config_file = rot_config_file();
+  if !config_file.exists() {
     let config = Config {
       dest: HashMap::new(),
-      custom: HashMap::new(),
+      overrides: HashMap::new(),
     };
 
     writeln!(
-      fs::File::create(&config_json)?,
+      fs::File::create(&config_file)?,
       "{}",
-      serde_json::to_string(&config)?
+      serde_json::to_string_pretty(&config)?
     )?;
 
-    util::info(format!("Created '{}'", config_json.display()));
+    util::info(format!("Created '{}'", config_file.display()));
   }
 
   Ok(())
 }
 
+/// Initializes rot config directory and file.
+/// Must be called before any other config function is used.
 pub fn init() -> Result<()> {
   create_config_dir_if_not_exists()?;
   create_config_if_not_exists()
+}
+
+pub fn get_config() -> Result<Config> {
+  let config: Config =
+    serde_json::from_str(&fs::read_to_string(rot_config_file()).unwrap())?;
+
+  Ok(config)
+}
+
+pub fn write_config(config: &Config) -> Result<()> {
+  let config_file = rot_config_file();
+  writeln!(
+    fs::File::create(&config_file)?,
+    "{}",
+    serde_json::to_string_pretty(&config)?
+  )
 }
