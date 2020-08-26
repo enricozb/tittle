@@ -25,7 +25,7 @@ enum SyncDirection {
 pub fn sync() -> Result<()> {
   use SyncDirection::*;
 
-  for (remote, local) in config::get_config()?.dest.iter() {
+  for (remote, local) in config::get_config()?.dests().iter() {
     let files = remote_and_local_files(&remote, &local)?;
 
     let direction = sync_direction(&files);
@@ -70,7 +70,7 @@ pub fn remote_and_local_files<P: AsRef<Path>, Q: AsRef<Path>>(
   let rot_config_dir = config::rot_config_dir();
   let remote = &rot_config_dir.join(remote);
 
-  if local.is_file() {
+  if remote.is_file() {
     return Ok(vec![(remote.to_path_buf(), local.to_path_buf())]);
   }
 
@@ -92,8 +92,12 @@ pub fn remote_and_local_files<P: AsRef<Path>, Q: AsRef<Path>>(
   return Ok(vec);
 }
 
-/// Returns a file's timestamp in seconds.
+/// Returns a file's timestamp in seconds. If the file does not exist then return 0.
 fn file_timestamp<P: AsRef<Path>>(path: P) -> u64 {
+  if !path.as_ref().exists() {
+    return 0;
+  }
+
   fs::metadata(path)
     .unwrap()
     .modified()

@@ -92,14 +92,12 @@ pub fn track<P: AsRef<Path>, Q: AsRef<Path>>(
   let mut config = config::get_config()?;
   let path_string = path.to_string_lossy();
 
-  if config.dest.contains_key(&name) {
+  if config.has_remote(&name) {
     return err::err(format!("The name '{}' is already being tracked", name));
   } else {
     copy(&path, &name)?;
 
-    config
-      .dest
-      .insert(name.to_string(), path_string.to_string());
+    config.track(name.to_string(), path_string.to_string());
 
     util::info(format!(
       "tracking {} under {}",

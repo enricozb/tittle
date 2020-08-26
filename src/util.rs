@@ -76,7 +76,7 @@ pub fn diff<P: AsRef<Path>, Q: AsRef<Path>>(from: P, to: Q) -> Result<Option<Str
   };
 
   let output = Command::new(diff_bin)
-    .arg("-ru")
+    .arg("-Nru")
     .arg(from)
     .arg(to)
     .output()?;
@@ -93,4 +93,14 @@ pub fn diff<P: AsRef<Path>, Q: AsRef<Path>>(from: P, to: Q) -> Result<Option<Str
   };
 
   Ok(output)
+}
+
+/// Returns a this machine's unique identifier.
+pub fn machine_id() -> Result<String> {
+  use std::io::prelude::*;
+
+  let mut file = fs::File::open("/etc/machine-id")?;
+  let mut contents = String::new();
+  file.read_to_string(&mut contents)?;
+  Ok(contents.trim().to_string())
 }

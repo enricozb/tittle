@@ -8,7 +8,7 @@ pub fn diff() -> Result<()> {
   let config = config::get_config()?;
   let rot_config_dir = config::rot_config_dir();
 
-  for (remote, local) in config.dest.iter() {
+  for (remote, local) in config.dests().iter() {
     let files = sync::remote_and_local_files(&remote, &local)?;
 
     for (remote_file, local_file) in files.iter() {
