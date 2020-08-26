@@ -7,8 +7,6 @@ fn infer_name_from_path<P: AsRef<Path>>(path: &P) -> Option<&std::ffi::OsStr> {
 
   if path.is_dir() {
     path.file_name()
-  } else if path.parent().unwrap() != config::user_config_dir() {
-    path.parent().unwrap().file_name()
   } else {
     None
   }

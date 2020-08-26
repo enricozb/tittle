@@ -1,47 +1,61 @@
-use crate::{config, diff};
+use crate::{config, diff, git};
 
 use anyhow::Result;
+use std::cmp::max;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 use walkdir::WalkDir;
 
+#[derive(PartialEq)]
+enum SyncDirection {
+  FromRemote,
+  ToRemote,
+  NoDiff,
+}
+
 pub fn sync() -> Result<()> {
+  use SyncDirection::*;
+
   let config = config::get_config()?;
   for (remote, local) in config.dest.iter() {
-    sync_info(&remote, &local)?;
+    let files = remote_and_local_files(&remote, &local)?;
+    match sync_direction(&files) {
+      NoDiff => continue,
+      direction => {
+        for (remote_file, local_file) in files.iter() {
+          if direction == FromRemote {
+            fs::copy(remote_file, local_file)?;
+          } else {
+            fs::copy(local_file, remote_file)?;
+          }
+        }
+      }
+    }
   }
 
   Ok(())
 }
 
-fn sync_info<P: AsRef<Path>, Q: AsRef<Path>>(
+/// Given a key, value pair into Config::dest, return a vector
+/// of the pair of corresponding remote and local files.
+fn remote_and_local_files<P: AsRef<Path>, Q: AsRef<Path>>(
   remote: P,
   local: Q,
-) -> Result<(SystemTime, SystemTime, bool)> {
+) -> Result<Vec<(PathBuf, PathBuf)>> {
   let remote = remote.as_ref();
   let local = local.as_ref();
 
   let rot_config_dir = config::rot_config_dir();
-  let remote_abs = &rot_config_dir.join(remote);
+  let remote = &rot_config_dir.join(remote);
 
   if local.is_file() {
-    return Ok((
-      fs::metadata(&remote_abs)?.modified()?,
-      fs::metadata(local)?.modified()?,
-      diff::diff(remote_abs, local)?,
-    ));
+    return Ok(vec![(remote.to_path_buf(), local.to_path_buf())]);
   }
 
-  let walker = WalkDir::new(remote_abs).into_iter();
-  for remote_file in walker {
+  let mut vec = Vec::new();
 
-    // TODO(enricozb): rewrite these two lines, i'm unsure how to satisfy
-    // the borrow checker here. It looks like
-    //
-    //   let remote_file = remote_file?.path()
-    //
-    // doesn't work because remote_file? is freed at the end of that statement.
+  for remote_file in WalkDir::new(remote).into_iter() {
     let remote_file = remote_file?;
     let remote_file = remote_file.path();
 
@@ -49,13 +63,48 @@ fn sync_info<P: AsRef<Path>, Q: AsRef<Path>>(
       continue;
     }
 
-    let local_file = local.join(remote_file.strip_prefix(&remote_abs)?);
+    let local_file = local.join(remote_file.strip_prefix(&remote)?);
 
-    println!(
-      "{} vs {}",
-      remote_file.display(), local_file.display()
-    );
+    vec.push((remote_file.to_path_buf(), local_file.to_path_buf()));
   }
 
-  Ok((SystemTime::now(), SystemTime::now(), true))
+  return Ok(vec);
+}
+
+fn file_timestamp<P: AsRef<Path>>(path: P) -> u64 {
+  fs::metadata(path)
+    .unwrap()
+    .modified()
+    .unwrap()
+    .duration_since(SystemTime::UNIX_EPOCH)
+    .unwrap()
+    .as_secs()
+}
+
+fn sync_direction<P: AsRef<Path>, Q: AsRef<Path>>(files: &[(P, Q)]) -> SyncDirection {
+  use SyncDirection::*;
+
+  let (remote_time, local_time, diff) = files
+    .iter()
+    .map(|(remote_f, local_f)| {
+      (
+        git::timestamp(remote_f).unwrap(),
+        file_timestamp(local_f),
+        diff::diff(remote_f, local_f).unwrap(),
+      )
+    })
+    .fold(
+      (0, 0, false),
+      |(r_acc, l_acc, d_acc), (r_time, l_time, diff)| {
+        (max(r_acc, r_time), max(l_acc, l_time), diff | d_acc)
+      },
+    );
+
+  if !diff {
+    NoDiff
+  } else if remote_time > local_time {
+    FromRemote
+  } else {
+    ToRemote
+  }
 }

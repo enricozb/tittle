@@ -1,7 +1,25 @@
 use crate::{config, util};
 
 use anyhow::Result;
+use std::path::Path;
 use std::process::Command;
+
+pub fn timestamp<P: AsRef<Path>>(path: P) -> Result<u64> {
+  use chrono::prelude::*;
+  let output = Command::new("git")
+    .arg("-C")
+    .arg(config::rot_config_dir())
+    .args(&["log", "--pretty=format:%cd", "-n", "1", "--date=iso", "--"])
+    .arg(path.as_ref())
+    .output()?;
+
+  Ok(
+    std::str::from_utf8(&output.stdout)?
+      .trim()
+      .parse::<DateTime<Utc>>()?
+      .timestamp() as u64,
+  )
+}
 
 pub fn commit(msg: &str) -> Result<()> {
   Command::new("git")
@@ -28,6 +46,8 @@ pub fn init() -> Result<()> {
       .output()?;
 
     util::info(std::str::from_utf8(&output.stdout)?.trim());
+
+    commit("initial commit")?;
   }
 
   Ok(())
