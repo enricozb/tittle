@@ -45,6 +45,16 @@ fn main() {
         ),
     )
     .subcommand(
+      SubCommand::with_name("repo")
+        .about("set the upstream dotfile repo")
+        .arg(
+          Arg::with_name("URL")
+            .help("the upstream repo url")
+            .required(true)
+            .index(1),
+        ),
+    )
+    .subcommand(
       SubCommand::with_name("sync").about("sync between remote and local dotfiles"),
     )
     .get_matches();
@@ -60,8 +70,9 @@ fn main() {
         matches.is_present("template"),
       )?,
 
-      ("sync", _) => cmd::sync::sync()?,
+      ("repo", Some(matches)) => cmd::repo::repo(matches.value_of("URL").unwrap())?,
 
+      ("sync", _) => cmd::sync::sync()?,
       _ => {}
     }
 
