@@ -1,4 +1,5 @@
-use crate::{config, git, util};
+use crate::util::{self, color};
+use crate::{config, git};
 
 use anyhow::Result;
 use std::cmp::max;
@@ -44,9 +45,9 @@ pub fn sync() -> Result<()> {
 
       util::info(format!(
         "sync {} {} {}",
-        util::path_color(remote_file),
+        color::path(remote_file),
         arrow_str,
-        util::path_color(local_file)
+        color::path(local_file)
       ));
     }
   }

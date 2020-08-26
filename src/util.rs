@@ -4,6 +4,21 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+pub mod color {
+  use colored::*;
+  use std::path::Path;
+
+  /// Returns `path` as a colored string for logging purposes.
+  pub fn path<P: AsRef<Path>>(path: P) -> ColoredString {
+    path.as_ref().to_str().unwrap().to_string().blue().bold()
+  }
+
+  /// Returns `msg` as an emphasized string for logging purposes.
+  pub fn emphasis<S: Into<String>>(msg: S) -> ColoredString {
+    msg.into().bold()
+  }
+}
+
 /// Log the message `msg` as info.
 pub fn info<S: std::fmt::Display>(msg: S) {
   println!("{} {}", "INFO:".green(), msg);
@@ -12,11 +27,6 @@ pub fn info<S: std::fmt::Display>(msg: S) {
 /// Log the message `msg` as error.
 pub fn error<S: std::fmt::Display>(msg: S) {
   println!("{} {}", "ERROR:".red(), msg);
-}
-
-/// Returns `path` as a colored string for logging purposes.
-pub fn path_color<P: AsRef<Path>>(path: P) -> ColoredString {
-  path.as_ref().to_str().unwrap().to_string().blue().bold()
 }
 
 /// Recursively copy the contents of one directory to another.
@@ -71,7 +81,7 @@ pub fn diff<P: AsRef<Path>, Q: AsRef<Path>>(from: P, to: Q) -> Result<Option<Str
   let (from, to) = (from.as_ref(), to.as_ref());
 
   if !to.exists() {
-    return Ok(Some(format!("New file {}", path_color(to))))
+    return Ok(Some(format!("New file {}", color::path(to))));
   }
 
   let diff_bin = match which::which("colordiff") {

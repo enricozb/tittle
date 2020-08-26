@@ -26,6 +26,10 @@ fn main() {
       ),
     )
     .subcommand(
+      SubCommand::with_name("render")
+        .about("render templates to their respective locations"),
+    )
+    .subcommand(
       SubCommand::with_name("repo")
         .about("sets the upstream dotfile repo")
         .arg(
@@ -71,6 +75,8 @@ fn main() {
 
     match matches.subcommand() {
       ("diff", _) => cmd::diff::diff()?,
+
+      ("render", _) => cmd::render::render()?,
 
       ("repo", Some(matches)) => cmd::repo::repo(matches.value_of("URL").unwrap())?,
 

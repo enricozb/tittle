@@ -1,5 +1,6 @@
 use crate::cmd::sync;
-use crate::{config, util};
+use crate::config;
+use crate::util::{self, color};
 
 use anyhow::Result;
 
@@ -17,7 +18,7 @@ pub fn diff() -> Result<()> {
         Some(diff) => {
           util::info(format!(
             "diff {}\n{}\n",
-            util::path_color(remote_file.strip_prefix(&rot_config_dir)?),
+            color::path(remote_file.strip_prefix(&rot_config_dir)?),
             diff
           ));
         }

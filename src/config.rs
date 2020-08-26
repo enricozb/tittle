@@ -1,4 +1,4 @@
-use crate::util;
+use crate::util::{self, color};
 
 use anyhow::Result;
 
@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 /// # Fields
 ///
 /// * `dest` - A map of remote paths to local paths, overriding the default `dest` map.
-/// * `templates` - A map from local template paths to their location after rendering,
+/// * `templates` - A map from remote template paths to their location after rendering,
 ///                 overriding the default `templates` map.
 /// * `vars` - A map from variable names to values, used for template rendering.
 #[derive(Serialize, Deserialize)]
@@ -35,33 +35,56 @@ pub struct OverrideConfig {
 /// * `overrides` - A map from a machine-id to an OverrideConfig.
 /// * `dest` - A map of remote paths to local paths, describing where each dotfile
 ///            or directory is stored on the local filesystem.
-/// * `templates` - A map from local template paths to their location after rendering.
+/// * `templates` - A map from remote template paths to their location after rendering.
 #[derive(Serialize, Deserialize)]
 pub struct Config {
   pub repo: Option<String>,
-  pub templates: HashMap<String, String>,
-  overrides: HashMap<String, OverrideConfig>,
   dest: HashMap<String, String>,
+  overrides: HashMap<String, OverrideConfig>,
+  templates: HashMap<String, String>,
 }
 
 impl Config {
+  pub fn dest<S: Into<String>>(&self, remote: S) -> String {
+    let remote = remote.into();
+
+    match util::machine_id() {
+      Err(_) => self.dest[&remote].clone(),
+      Ok(machine_id) => match self.overrides.get(&machine_id) {
+        None => self.dest[&remote].clone(),
+        Some(override_config) => override_config.dest[&remote].clone(),
+      },
+    }
+  }
+
   pub fn dests(&self) -> HashMap<String, String> {
     match util::machine_id() {
       Err(_) => self.dest.clone(),
       Ok(machine_id) => match self.overrides.get(&machine_id) {
         None => self.dest.clone(),
-        Some(override_dest) => self
-          .dest
-          .iter()
-          .map(|(remote, local)| {
-            (
-              remote.to_owned(),
-              override_dest.dest.get(remote).unwrap_or(local).to_owned(),
-            )
-          })
-          .collect(),
+        Some(override_config) => update_hash_map(&self.dest, &override_config.dest),
       },
     }
+  }
+
+  pub fn templates(&self) -> HashMap<String, String> {
+    match util::machine_id() {
+      Err(_) => self.templates.clone(),
+      Ok(machine_id) => match self.overrides.get(&machine_id) {
+        None => self.templates.clone(),
+        Some(override_config) => {
+          update_hash_map(&self.templates, &override_config.templates)
+        }
+      },
+    }
+  }
+
+  pub fn track_template<R: Into<String>, S: Into<String>>(
+    &mut self,
+    name: R,
+    render_to: S,
+  ) {
+    self.templates.insert(name.into(), render_to.into());
   }
 
   pub fn track<R: Into<String>, S: Into<String>>(&mut self, remote: R, local: S) {
@@ -71,6 +94,26 @@ impl Config {
   pub fn has_remote<S: Into<String>>(&self, remote: S) -> bool {
     self.dest.contains_key(&remote.into())
   }
+
+  pub fn vars(&self) -> HashMap<String, String> {
+    match util::machine_id() {
+      Err(_) => HashMap::new(),
+      Ok(machine_id) => match self.overrides.get(&machine_id) {
+        None => HashMap::new(),
+        Some(override_config) => override_config.vars.clone(),
+      },
+    }
+  }
+}
+
+fn update_hash_map(
+  old: &HashMap<String, String>,
+  new: &HashMap<String, String>,
+) -> HashMap<String, String> {
+  old
+    .iter()
+    .map(|(k, v)| (k.to_owned(), new.get(k).unwrap_or(v).to_owned()))
+    .collect()
 }
 
 /// Returns the path of the user's config directory.
@@ -118,7 +161,7 @@ fn create_config_if_not_exists() -> Result<()> {
       serde_json::to_string_pretty(&config)?
     )?;
 
-    util::info(format!("Created '{}'", config_file.display()));
+    util::info(format!("Created {}", color::path(config_file)));
   }
 
   Ok(())

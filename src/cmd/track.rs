@@ -1,4 +1,5 @@
-use crate::{config, err, util};
+use crate::util::{self, color};
+use crate::{config, err};
 
 use anyhow::Result;
 use std::{fs, path::Path};
@@ -65,11 +66,13 @@ pub fn track<P: AsRef<Path>, Q: AsRef<Path>>(
   name: Option<&str>,
   renders_to: Option<Q>,
 ) -> Result<()> {
-  let path = path.as_ref().canonicalize()?;
+  let path = path.as_ref();
 
   if !path.exists() {
     return err::err(format!("Path does not exist: '{}'", path.display()));
   }
+
+  let path = path.canonicalize()?;
 
   // Ensure that `renders_to` is set only if path is a file.
   match renders_to {
@@ -101,14 +104,14 @@ pub fn track<P: AsRef<Path>, Q: AsRef<Path>>(
 
     util::info(format!(
       "tracking {} under {}",
-      util::path_color(&path),
-      util::path_color(name),
+      color::path(&path),
+      color::path(&name),
     ));
   }
 
   if let Some(renders_to) = renders_to {
-    config.templates.insert(
-      path_string.to_string(),
+    config.track_template(
+      name.to_string(),
       renders_to
         .as_ref()
         .canonicalize()?
@@ -118,8 +121,8 @@ pub fn track<P: AsRef<Path>, Q: AsRef<Path>>(
 
     util::info(format!(
       "template {} renders to {}",
-      util::path_color(&path),
-      util::path_color(renders_to),
+      color::path(&path),
+      color::path(renders_to),
     ));
   }
 
