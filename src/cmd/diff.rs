@@ -16,7 +16,7 @@ pub fn diff() -> Result<()> {
         None => continue,
         Some(diff) => {
           util::info(format!(
-            "diff {}\n{}",
+            "diff {}\n{}\n",
             util::path_color(remote_file.strip_prefix(&rot_config_dir)?),
             diff
           ));
