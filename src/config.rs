@@ -9,7 +9,14 @@ use std::{env, fs};
 
 use serde::{Deserialize, Serialize};
 
-/// A JSON-serializable struct representing machine-specific template overrides.
+/// A JSON-serializable struct representing machine-specific overrides. This is used
+/// to specify values of variables in templates for a specific machine for each
+/// remote name that is tracked.
+///
+/// # Fields
+///
+/// * `dest` - A map of remote paths to local paths, overriding the default `dest` map.
+/// * `vars` - A map from variable names to values, used for template rendering.
 #[derive(Serialize, Deserialize)]
 pub struct OverrideConfig {
   pub dest: HashMap<String, String>,
@@ -17,11 +24,20 @@ pub struct OverrideConfig {
 }
 
 /// A struct representing the JSON in `rot_config.json`.
+///
+/// # Fields
+///
+/// * `repo` - The url, if any, to the upstream repository of the dotfiles.
+/// * `dest` - A map of remote paths to local paths, describing where each dotfile
+///            or directory is stored on the local filesystem.
+/// * `overrides` - A map from a machine-id to an OverrideConfig.
+/// * `templates` - A map from local template paths to their location after rendering.
 #[derive(Serialize, Deserialize)]
 pub struct Config {
   pub repo: Option<String>,
   pub dest: HashMap<String, String>,
   pub overrides: HashMap<String, OverrideConfig>,
+  pub templates: HashMap<String, String>,
 }
 
 /// Returns the path of the user's config directory.
@@ -60,6 +76,7 @@ fn create_config_if_not_exists() -> Result<()> {
       repo: None,
       dest: HashMap::new(),
       overrides: HashMap::new(),
+      templates: HashMap::new(),
     };
 
     writeln!(

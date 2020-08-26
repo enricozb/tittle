@@ -57,12 +57,26 @@ fn copy<P: AsRef<Path>>(path: P, name: &str) -> Result<()> {
   Ok(())
 }
 
-/// Track a local `path` under a remote `name`, potentially marking it as a template.
-pub fn track<P: AsRef<Path>>(path: P, name: Option<&str>, _template: bool) -> Result<()> {
-  let path = path.as_ref();
+/// Track a local `path` under a remote `name`, potentially making it a template.
+/// The `renders_to` argument points to the path that the template `path` renders to.
+/// If `renders_to` is not `None` then `path` must be pointing to a template file.
+pub fn track<P: AsRef<Path>, Q: AsRef<Path>>(
+  path: P,
+  name: Option<&str>,
+  renders_to: Option<Q>,
+) -> Result<()> {
+  let path = path.as_ref().canonicalize()?;
 
   if !path.exists() {
     return err::err(format!("Path does not exist: '{}'", path.display()));
+  }
+
+  // Ensure that `renders_to` is set only if path is a file.
+  match renders_to {
+    Some(_) if path.is_dir() => {
+      return err::err("--renders_to can only be set if PATH is a file, not a directory")
+    }
+    _ => (),
   }
 
   let name = match infer_name(&path, name) {
@@ -76,6 +90,8 @@ pub fn track<P: AsRef<Path>>(path: P, name: Option<&str>, _template: bool) -> Re
   };
 
   let mut config = config::get_config()?;
+  let path_string = path.to_string_lossy();
+
   if config.dest.contains_key(&name) {
     return err::err(format!("The name '{}' is already being tracked", name));
   } else {
@@ -83,12 +99,29 @@ pub fn track<P: AsRef<Path>>(path: P, name: Option<&str>, _template: bool) -> Re
 
     config
       .dest
-      .insert(name.to_string(), path.to_string_lossy().into_owned());
+      .insert(name.to_string(), path_string.to_string());
 
     util::info(format!(
       "tracking {} under {}",
-      util::path_color(path),
+      util::path_color(&path),
       util::path_color(name),
+    ));
+  }
+
+  if let Some(renders_to) = renders_to {
+    config.templates.insert(
+      path_string.to_string(),
+      renders_to
+        .as_ref()
+        .canonicalize()?
+        .to_string_lossy()
+        .to_string(),
+    );
+
+    util::info(format!(
+      "template {} renders to {}",
+      util::path_color(&path),
+      util::path_color(renders_to),
     ));
   }
 
