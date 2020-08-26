@@ -4,19 +4,23 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+/// Log the message `msg` as info.
 pub fn info<S: std::fmt::Display>(msg: S) {
   println!("{} {}", "INFO:".green(), msg);
 }
 
+/// Log the message `msg` as error.
 pub fn error<S: std::fmt::Display>(msg: S) {
   println!("{} {}", "ERROR:".red(), msg);
 }
 
-pub fn path_color<S: Into<String>>(path: S) -> ColoredString {
-  path.into().blue().bold()
+/// Returns `path` as a colored string for logging purposes.
+pub fn path_color<P: AsRef<Path>>(path: P) -> ColoredString {
+  path.as_ref().to_str().unwrap().to_string().blue().bold()
 }
 
-// https://stackoverflow.com/a/60406693/6101419
+/// Recursively copy the contents of one directory to another.
+/// https://stackoverflow.com/a/60406693/6101419
 pub fn copy_dir<U: AsRef<Path>, V: AsRef<Path>>(
   from: U,
   to: V,
@@ -61,6 +65,8 @@ pub fn copy_dir<U: AsRef<Path>, V: AsRef<Path>>(
   Ok(())
 }
 
+/// Returns the output of the `diff` command on the two files. This uses `colordiff`
+/// if it is available. If there is no diff between the two files, the returns `None`.
 pub fn diff<P: AsRef<Path>, Q: AsRef<Path>>(from: P, to: Q) -> Result<Option<String>> {
   let (from, to) = (from.as_ref(), to.as_ref());
 

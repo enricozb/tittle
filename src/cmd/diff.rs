@@ -3,9 +3,11 @@ use crate::{config, util};
 
 use anyhow::Result;
 
+/// Prints any diffs between any remote and local dotfiles.
 pub fn diff() -> Result<()> {
   let config = config::get_config()?;
   let rot_config_dir = config::rot_config_dir();
+
   for (remote, local) in config.dest.iter() {
     let files = sync::remote_and_local_files(&remote, &local)?;
 
@@ -14,12 +16,10 @@ pub fn diff() -> Result<()> {
         None => continue,
         Some(diff) => {
           util::info(format!(
-            "diff {}",
-            util::path_color(
-              remote_file.strip_prefix(&rot_config_dir)?.to_str().unwrap()
-            ),
+            "diff {}\n{}",
+            util::path_color(remote_file.strip_prefix(&rot_config_dir)?),
+            diff
           ));
-          println!("{}", diff);
         }
       }
     }

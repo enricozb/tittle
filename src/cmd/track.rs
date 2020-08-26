@@ -3,6 +3,7 @@ use crate::{config, err, util};
 use anyhow::Result;
 use std::{fs, path::Path};
 
+/// Returns a remote name given a local `path`.
 fn infer_name_from_path<P: AsRef<Path>>(path: &P) -> Option<&std::ffi::OsStr> {
   let path = path.as_ref();
 
@@ -13,6 +14,7 @@ fn infer_name_from_path<P: AsRef<Path>>(path: &P) -> Option<&std::ffi::OsStr> {
   }
 }
 
+/// Returns a remote name given a remote `path` and optionally an override `name`.
 fn infer_name<P: AsRef<Path>>(path: &P, name: Option<&str>) -> Option<String> {
   let path = path.as_ref();
 
@@ -35,6 +37,9 @@ fn infer_name<P: AsRef<Path>>(path: &P, name: Option<&str>) -> Option<String> {
   }
 }
 
+/// Copies local `path` to be tracked under the remote directory `name`.
+///
+/// If `path` is a directory then all of its contents are copied to the remote `name`.
 fn copy<P: AsRef<Path>>(path: P, name: &str) -> Result<()> {
   let path = path.as_ref();
 
@@ -52,6 +57,7 @@ fn copy<P: AsRef<Path>>(path: P, name: &str) -> Result<()> {
   Ok(())
 }
 
+/// Track a local `path` under a remote `name`, potentially marking it as a template.
 pub fn track<P: AsRef<Path>>(path: P, name: Option<&str>, _template: bool) -> Result<()> {
   let path = path.as_ref();
 
@@ -81,7 +87,7 @@ pub fn track<P: AsRef<Path>>(path: P, name: Option<&str>, _template: bool) -> Re
 
     util::info(format!(
       "tracking {} under {}",
-      util::path_color(path.to_string_lossy()),
+      util::path_color(path),
       util::path_color(name),
     ));
   }

@@ -25,7 +25,7 @@ fn main() {
     ))
     .subcommand(
       SubCommand::with_name("repo")
-        .about("set the upstream dotfile repo")
+        .about("sets the upstream dotfile repo")
         .arg(
           Arg::with_name("URL")
             .help("the upstream repo url")

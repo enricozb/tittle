@@ -7,6 +7,7 @@ use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 use walkdir::WalkDir;
 
+/// Represents which direction to sync dotfiles.
 #[derive(PartialEq)]
 enum SyncDirection {
   FromRemote,
@@ -14,40 +15,51 @@ enum SyncDirection {
   NoDiff,
 }
 
+/// Synchronizes the remote and local dotfiles.
+///
+/// If two files are the same, then no copying occurs. Otherwise, the newer file
+/// remains and is copied onto the other. The timestamp of a file depends on whether
+/// it is a local file or a remote file. Remote files have their timestamps determined
+/// by the time of the most recent commit which modifies them. Local files' timestamps
+/// are determined by the filesystem.
 pub fn sync() -> Result<()> {
   use SyncDirection::*;
 
-  let config = config::get_config()?;
-  for (remote, local) in config.dest.iter() {
+  for (remote, local) in config::get_config()?.dest.iter() {
     let files = remote_and_local_files(&remote, &local)?;
-    match sync_direction(&files) {
-      NoDiff => continue,
-      direction => {
-        for (remote_file, local_file) in files.iter() {
-          let arrow_str = if direction == FromRemote {
-            fs::copy(remote_file, local_file)?;
-            "->"
-          } else {
-            fs::copy(local_file, remote_file)?;
-            "<-"
-          };
 
-          util::info(format!(
-            "sync {} {} {}",
-            util::path_color(remote_file.to_str().unwrap()),
-            arrow_str,
-            util::path_color(local_file.to_str().unwrap())
-          ));
-        }
-      }
+    let direction = sync_direction(&files);
+    if direction == NoDiff {
+      continue;
+    }
+
+    for (remote_file, local_file) in files.iter() {
+      let arrow_str = if direction == FromRemote {
+        fs::copy(remote_file, local_file)?;
+        "->"
+      } else {
+        fs::copy(local_file, remote_file)?;
+        "<-"
+      };
+
+      util::info(format!(
+        "sync {} {} {}",
+        util::path_color(remote_file),
+        arrow_str,
+        util::path_color(local_file)
+      ));
     }
   }
 
   Ok(())
 }
 
-/// Given a key, value pair into Config::dest, return a vector
-/// of the pair of corresponding remote and local files.
+/// Returns the pairs of corresponding files under a tracked file or directory.
+///
+/// # Arguments
+///
+/// * `remote` - A key from `Config::dest`.
+/// * `local` - The corresponding value to the key `remote`.
 pub fn remote_and_local_files<P: AsRef<Path>, Q: AsRef<Path>>(
   remote: P,
   local: Q,
@@ -80,6 +92,7 @@ pub fn remote_and_local_files<P: AsRef<Path>, Q: AsRef<Path>>(
   return Ok(vec);
 }
 
+/// Returns a file's timestamp in seconds.
 fn file_timestamp<P: AsRef<Path>>(path: P) -> u64 {
   fs::metadata(path)
     .unwrap()
@@ -90,6 +103,12 @@ fn file_timestamp<P: AsRef<Path>>(path: P) -> u64 {
     .as_secs()
 }
 
+/// Returns which direction to sync this sequence of `(remote, local)` files.
+///
+/// This function assumes that this is an return value of `remote_and_local_files`.
+/// If no diffs occur between the pairs of files in `files`, then `NoDiff` will be
+/// returned. If the remote files contain the newest file, then `FromRemote`
+/// is returned. Otherwise, `ToRemote` is returned.
 fn sync_direction<P: AsRef<Path>, Q: AsRef<Path>>(files: &[(P, Q)]) -> SyncDirection {
   use SyncDirection::*;
 

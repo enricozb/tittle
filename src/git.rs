@@ -4,6 +4,7 @@ use anyhow::Result;
 use std::path::Path;
 use std::process::Command;
 
+/// Returns the timestamp of the most recent commit modifying `path` in seconds.
 pub fn timestamp<P: AsRef<Path>>(path: P) -> Result<u64> {
   use chrono::prelude::*;
   let output = Command::new("git")
@@ -21,6 +22,7 @@ pub fn timestamp<P: AsRef<Path>>(path: P) -> Result<u64> {
   )
 }
 
+/// Create a commit under `rot_config_dir()` with the message `msg`.
 pub fn commit(msg: &str) -> Result<()> {
   Command::new("git")
     .arg("-C")
@@ -37,6 +39,8 @@ pub fn commit(msg: &str) -> Result<()> {
   Ok(())
 }
 
+/// Initializes a Git repository under the rot config directory. This must be called
+/// before any other functions from `git::*` are called.
 pub fn init() -> Result<()> {
   if !config::rot_config_dir().join(".git").exists() {
     let output = Command::new("git")
