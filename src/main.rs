@@ -4,7 +4,6 @@ use std::env;
 
 mod cmd;
 mod config;
-mod diff;
 mod err;
 mod git;
 mod util;
@@ -20,6 +19,22 @@ fn main() {
         .short("v")
         .long("verbose")
         .help("Print commands as they are run"),
+    )
+    .subcommand(SubCommand::with_name("diff").about(
+      "show diffs between remote and local dotfiles. Uses colordiff if available",
+    ))
+    .subcommand(
+      SubCommand::with_name("repo")
+        .about("set the upstream dotfile repo")
+        .arg(
+          Arg::with_name("URL")
+            .help("the upstream repo url")
+            .required(true)
+            .index(1),
+        ),
+    )
+    .subcommand(
+      SubCommand::with_name("sync").about("sync between remote and local dotfiles"),
     )
     .subcommand(
       SubCommand::with_name("track")
@@ -44,19 +59,6 @@ fn main() {
             .index(1),
         ),
     )
-    .subcommand(
-      SubCommand::with_name("repo")
-        .about("set the upstream dotfile repo")
-        .arg(
-          Arg::with_name("URL")
-            .help("the upstream repo url")
-            .required(true)
-            .index(1),
-        ),
-    )
-    .subcommand(
-      SubCommand::with_name("sync").about("sync between remote and local dotfiles"),
-    )
     .get_matches();
 
   let run = || -> Result<()> {
@@ -64,15 +66,18 @@ fn main() {
     git::init()?;
 
     match matches.subcommand() {
+      ("diff", _) => cmd::diff::diff()?,
+
+      ("repo", Some(matches)) => cmd::repo::repo(matches.value_of("URL").unwrap())?,
+
+      ("sync", _) => cmd::sync::sync()?,
+
       ("track", Some(matches)) => cmd::track::track(
         matches.value_of("PATH").unwrap(),
         matches.value_of("name"),
         matches.is_present("template"),
       )?,
 
-      ("repo", Some(matches)) => cmd::repo::repo(matches.value_of("URL").unwrap())?,
-
-      ("sync", _) => cmd::sync::sync()?,
       _ => {}
     }
 

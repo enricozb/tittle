@@ -1,6 +1,8 @@
+use anyhow::Result;
 use colored::*;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::process::Command;
 
 pub fn info<S: std::fmt::Display>(msg: S) {
   println!("{} {}", "INFO:".green(), msg);
@@ -46,11 +48,39 @@ pub fn copy_dir<U: AsRef<Path>, V: AsRef<Path>>(
             let dest_path = dest.join(filename);
             fs::copy(&path, &dest_path)?;
           }
-          None => ()
+          None => (),
         }
       }
     }
   }
 
   Ok(())
+}
+
+pub fn diff<P: AsRef<Path>, Q: AsRef<Path>>(from: P, to: Q) -> Result<Option<String>> {
+  let (from, to) = (from.as_ref(), to.as_ref());
+
+  let diff_bin = match which::which("colordiff") {
+    Ok(_) => "colordiff",
+    Err(_) => "diff",
+  };
+
+  let output = Command::new(diff_bin)
+    .arg("-r")
+    .arg(from)
+    .arg(to)
+    .output()?;
+
+  let output = match output.status.code() {
+    None => None,
+    Some(code) => {
+      if code == 0 {
+        None
+      } else {
+        Some(std::str::from_utf8(&output.stdout)?.to_string())
+      }
+    }
+  };
+
+  Ok(output)
 }

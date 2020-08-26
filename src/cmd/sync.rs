@@ -1,4 +1,4 @@
-use crate::{config, diff, git};
+use crate::{config, util, git};
 
 use anyhow::Result;
 use std::cmp::max;
@@ -39,7 +39,7 @@ pub fn sync() -> Result<()> {
 
 /// Given a key, value pair into Config::dest, return a vector
 /// of the pair of corresponding remote and local files.
-fn remote_and_local_files<P: AsRef<Path>, Q: AsRef<Path>>(
+pub fn remote_and_local_files<P: AsRef<Path>, Q: AsRef<Path>>(
   remote: P,
   local: Q,
 ) -> Result<Vec<(PathBuf, PathBuf)>> {
@@ -90,13 +90,13 @@ fn sync_direction<P: AsRef<Path>, Q: AsRef<Path>>(files: &[(P, Q)]) -> SyncDirec
       (
         git::timestamp(remote_f).unwrap(),
         file_timestamp(local_f),
-        diff::diff(remote_f, local_f).unwrap(),
+        util::diff(remote_f, local_f).unwrap(),
       )
     })
     .fold(
       (0, 0, false),
       |(r_acc, l_acc, d_acc), (r_time, l_time, diff)| {
-        (max(r_acc, r_time), max(l_acc, l_time), diff | d_acc)
+        (max(r_acc, r_time), max(l_acc, l_time), d_acc | (None == diff))
       },
     );
 
