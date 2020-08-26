@@ -80,9 +80,9 @@ pub fn track<P: AsRef<Path>>(path: P, name: Option<&str>, _template: bool) -> Re
       .insert(name.to_string(), path.to_string_lossy().into_owned());
 
     util::info(format!(
-      "tracking '{}' under '{}'",
-      path.to_string_lossy().into_owned(),
-      name,
+      "tracking {} under {}",
+      util::path_color(path.to_string_lossy()),
+      util::path_color(name),
     ));
   }
 

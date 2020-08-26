@@ -1,4 +1,4 @@
-use crate::{config, util, git};
+use crate::{config, git, util};
 
 use anyhow::Result;
 use std::cmp::max;
@@ -24,11 +24,20 @@ pub fn sync() -> Result<()> {
       NoDiff => continue,
       direction => {
         for (remote_file, local_file) in files.iter() {
-          if direction == FromRemote {
+          let arrow_str = if direction == FromRemote {
             fs::copy(remote_file, local_file)?;
+            "->"
           } else {
             fs::copy(local_file, remote_file)?;
-          }
+            "<-"
+          };
+
+          util::info(format!(
+            "sync {} {} {}",
+            util::path_color(remote_file.to_str().unwrap()),
+            arrow_str,
+            util::path_color(local_file.to_str().unwrap())
+          ));
         }
       }
     }
@@ -96,7 +105,11 @@ fn sync_direction<P: AsRef<Path>, Q: AsRef<Path>>(files: &[(P, Q)]) -> SyncDirec
     .fold(
       (0, 0, false),
       |(r_acc, l_acc, d_acc), (r_time, l_time, diff)| {
-        (max(r_acc, r_time), max(l_acc, l_time), d_acc | (None == diff))
+        (
+          max(r_acc, r_time),
+          max(l_acc, l_time),
+          d_acc | (None != diff),
+        )
       },
     );
 

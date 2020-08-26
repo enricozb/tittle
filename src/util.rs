@@ -12,6 +12,10 @@ pub fn error<S: std::fmt::Display>(msg: S) {
   println!("{} {}", "ERROR:".red(), msg);
 }
 
+pub fn path_color<S: Into<String>>(path: S) -> ColoredString {
+  path.into().blue().bold()
+}
+
 // https://stackoverflow.com/a/60406693/6101419
 pub fn copy_dir<U: AsRef<Path>, V: AsRef<Path>>(
   from: U,
@@ -66,7 +70,7 @@ pub fn diff<P: AsRef<Path>, Q: AsRef<Path>>(from: P, to: Q) -> Result<Option<Str
   };
 
   let output = Command::new(diff_bin)
-    .arg("-r")
+    .arg("-ru")
     .arg(from)
     .arg(to)
     .output()?;
