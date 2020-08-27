@@ -1,0 +1,104 @@
+= Rot - Config
+
+This is a specification of the rot JSON config, accessed with `rot edit`.
+
+The default rot config is
+```
+{
+  "repo": null,
+  "dest": {},
+  "overrides": {},
+  "templates": {}
+}
+```
+and a more mature config looks like
+```
+{
+  "repo": "git@github.com:enricozb/dotfiles",
+  "dest": {
+    "rofi/config.rasi.template": "/home/enricozb/.config/rofi/config.rasi.template",
+    "i3/config.template": "/home/enricozb/.config/i3/config.template",
+    "tmux/.tmux.conf": "/home/enricozb/.tmux.conf"
+  },
+  "overrides": {
+    "enricozb@xibalba": {
+      "dest": {},
+      "templates": {},
+      "vars": {
+        "BAR_HEIGHT": "22",
+        "ROFI_FONT": "Terminus Medium 12",
+        "BAR_FONT": "Terminus"
+      }
+    }
+  },
+  "templates": {
+    "i3/config.template": "/home/enricozb/.config/i3/config",
+    "rofi/config.rasi.template": "/home/enricozb/.config/rofi/config.rasi"
+  }
+}
+
+```
+
+== Fields
+
+*repo* (`null`|`string`)::
+  The url to the upstream repository.
+
+*dest* (`Map<string, string>`)::
+  Relates remote tracked files and their default location on the user's filesystem.
+  Keys are paths _relative_ to the rot directory, and values are _absolute_ paths.
+  Keys and values can be directories or files, but if a key is a (directory/file) then
+  its value must be a (directory/file). This map is overridden by user/machine-specific
+  *dest* maps in *overrides*.
+
+*overrides* (`Map<string, Overrides>`)::
+  Specifies user/machine-specific template variables and overrides to *dest* and
+  *templates*.  Keys are unique user/machine identifiers. These are determined in a
+  platform-dependent way. In Unix, this is the output of `hostname`. See <<overrides>>
+  for details on the *Overrides* specification.
+
+*templates* (`Map<string, string>`)::
+  Relates template files and their default rendered location on the user's filesystem.
+  Keys are paths _relative_ to the rot directory, and values are _absolute_ paths.
+  Keys and values must be files, and cannot be directories. This map is overridden by
+  user/machine-specific *templates* in *overrides*.
+
+== Overrides
+
+The *overrides* field in the config lets you specify user/machine-specific overrides to
+*dest*, *templates*, and lets you specify variables for templates. A sample *overrides*
+field looks like this (note that this would occur within the rot config):
+
+```
+"overrides": {
+  "enricozb@xibalba": {
+    "dest": {},
+    "templates": {},
+    "vars": {
+      "BAR_HEIGHT": "22",
+      "ROFI_FONT": "Terminus Medium 12",
+      "BAR_FONT": "Terminus"
+    }
+  }
+},
+```
+The config above has an override specified for a single user/machine pair,
+`enricozb@xibalba`.  When running `rot sync` on `enricozb@xibalba`, entries in the
+override *dest* and *templates* take precedence over those in the default config.
+Note that the sets of keys of the override *dest* and *templates* must be subsets
+of the default *dest* and *templates*, respectively.  The config above has also
+specified template variables (see <<templates#, templates>>), under the *vars* field.
+
+=== Fields
+
+*dest* (`Map<string, string>`)::
+  Overrides the default *dest* field and has the same restrictions on keys and values.
+
+*templates* (`Map<string, string>`)::
+  Overrides the default *templates* field and has the same restrictions on keys
+  and values.
+
+*vars* (`Map<string, string>`)::
+  Variables to replace in templates. All variable values must be strings. Within a
+  template, substitution occurs within any text wrapped in double braces `{{..}}`.
+  See <<templates#, templates>> for more information.

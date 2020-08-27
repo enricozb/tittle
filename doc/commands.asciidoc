@@ -1,0 +1,71 @@
+= Rot - Commands
+
+This is an exhaustive list of commands that rot accepts with `rot <command>`.
+
+== Commands
+
+*diff*::
+  Show any diffs between remote and local dotfiles, using `colordiff(1)` if available.
+
+*edit* [<mode>]::
+  Edit the rot config. This requires the environment variable `$EDITOR` to be set, and
+  will fail otherwise. See <<config#,config>> for details on the config structure.
+  Specify which part of the config to edit with *<mode>*:
+    *config* (default):::
+      edit the entire config.
+    *me*:::
+      edit the overrides specific to this user/machine.
+
+*help* [<command>]::
+  Show help information about a specific command. If *<command>* is omitted, then a
+  more general help menu is shown.
+
+*pull*::
+  Pulls from the upstream repo. A repository must first be set with `rot repo <url>`.
+
+*push*::
+  Pushes to the upstream repo. A repository must first be set with `rot repo <url>`.
+
+*render*::
+  Renders all templates to their corresponding locations (see
+  <<templates#,templates>>). This will fail only if a template references a variable
+  that is not defined for this user/machine. Variables can be defined in `rot edit`.
+
+*repo* <url>::
+  Sets the upstream dotfile repo to *<url>*. No validation of the url is done, so if
+  the url is invalid, then `repo pull` and `repo push` will fail.
+
+*sync*::
+  Synchronize the remote and local dotfiles. This has different behavior depending on
+  whether a file was tracked as a result of tracking a directory (`rot track <dir>`)
+  or if the file was tracked individually (`rot track <file> -n <name>`):
+
+  If a directory was tracked:::
+  `rot sync` first checks if any differences exist between the remote and local
+  directories. If a difference exists, rot keeps the directory with the _most recently
+  modified file_, and replaces the other one.
+
+  If a file was tracked:::
+  `rot sync` replaces older file with the newer one, if a difference exists.
+
+*track* <path> [--name <name>] [--renders_to <file>]::
+  Track a file or a directory. Tracked files are never stored at the root of the rot
+  repository, they are each under at least one directory. The name of this directory
+  is the basename of *<path>* if path is a directory. Otherwise, it must be specified
+  through *--name*. *track* has different behavior depending on the value of *<path>*:
+
+  If *<path>* is a directory:::
+    The entire directory and all of its contents are tracked.
+
+  If *<path>* is a file:::
+    *--name* must be set to specify which directory this file will be placed under
+    in the rot repository.
+
+  If *<path>* is a template (see <<templates#, templates>>):::
+    *--renders_to* must be set to specify where this template renders to, in
+    addition to *--name* to specify which directory this template will be placed under
+    in the rot repository.
+
+*tree*::
+  Shows a the file structure of the rot repository. Useful to see exactly which files
+  are being tracked. Requires the `tree(1)` utility.

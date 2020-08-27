@@ -111,10 +111,20 @@ pub fn diff<P: AsRef<Path>, Q: AsRef<Path>>(from: P, to: Q) -> Result<Option<Str
 
 /// Returns a this machine's unique identifier.
 pub fn machine_id() -> Result<String> {
-  use std::io::prelude::*;
+  // use std::io::prelude::*;
+  // let mut file = fs::File::open("/etc/machine-id")?;
+  // let mut contents = String::new();
+  // file.read_to_string(&mut contents)?;
+  // Ok(contents.trim().to_string())
 
-  let mut file = fs::File::open("/etc/machine-id")?;
-  let mut contents = String::new();
-  file.read_to_string(&mut contents)?;
-  Ok(contents.trim().to_string())
+  use std::str::from_utf8;
+
+  let hostname = Command::new("hostname").output()?.stdout;
+  let whoami = Command::new("whoami").output()?.stdout;
+
+  Ok(format!(
+    "{}@{}",
+    from_utf8(&whoami)?.trim(),
+    from_utf8(&hostname)?.trim()
+  ))
 }
