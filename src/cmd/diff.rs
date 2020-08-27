@@ -7,7 +7,7 @@ use anyhow::Result;
 /// Prints any diffs between any remote and local dotfiles.
 pub fn diff() -> Result<()> {
   let config = config::get_config()?;
-  let rot_config_dir = config::rot_config_dir();
+  let tittle_config_dir = config::tittle_config_dir();
 
   for (remote, local) in config.dests().iter() {
     let files = sync::remote_and_local_files(&remote, &local)?;
@@ -18,7 +18,7 @@ pub fn diff() -> Result<()> {
         Some(diff) => {
           util::info(format!(
             "diff {}\n{}\n",
-            color::path(remote_file.strip_prefix(&rot_config_dir)?),
+            color::path(remote_file.strip_prefix(&tittle_config_dir)?),
             diff
           ));
         }

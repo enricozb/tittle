@@ -9,7 +9,7 @@ pub fn timestamp<P: AsRef<Path>>(path: P) -> Result<u64> {
   use chrono::prelude::*;
   let output = Command::new("git")
     .arg("-C")
-    .arg(config::rot_config_dir())
+    .arg(config::tittle_config_dir())
     .args(&["log", "--pretty=format:%cd", "-n", "1", "--date=iso", "--"])
     .arg(path.as_ref())
     .output()?;
@@ -26,7 +26,7 @@ pub fn timestamp<P: AsRef<Path>>(path: P) -> Result<u64> {
 pub fn add_remote(url: &str) -> Result<()> {
   let status = Command::new("git")
     .arg("-C")
-    .arg(config::rot_config_dir())
+    .arg(config::tittle_config_dir())
     .args(&["remote", "add", "origin", url])
     .status()?;
 
@@ -46,7 +46,7 @@ fn git_cmd(cmd: &[&str]) -> Result<()> {
 
   let status = Command::new("git")
     .arg("-C")
-    .arg(config::rot_config_dir())
+    .arg(config::tittle_config_dir())
     .args(cmd)
     .status()?;
 
@@ -57,39 +57,39 @@ fn git_cmd(cmd: &[&str]) -> Result<()> {
   }
 }
 
-/// Pull in any changes in the rot Git repository.
+/// Pull in any changes in the tittle Git repository.
 pub fn pull() -> Result<()> {
   git_cmd(&["pull", "origin", "master"])
 }
 
-/// Push any changes in the rot Git repository.
+/// Push any changes in the tittle Git repository.
 pub fn push() -> Result<()> {
   git_cmd(&["push", "-u", "origin", "master"])
 }
-/// Create a commit under `rot_config_dir()` with the message `msg`.
+/// Create a commit under `tittle_config_dir()` with the message `msg`.
 pub fn commit(msg: &str) -> Result<()> {
   Command::new("git")
     .arg("-C")
-    .arg(config::rot_config_dir())
+    .arg(config::tittle_config_dir())
     .args(&["add", "."])
     .output()?;
 
   Command::new("git")
     .arg("-C")
-    .arg(config::rot_config_dir())
+    .arg(config::tittle_config_dir())
     .args(&["commit", "-m", msg])
     .output()?;
 
   Ok(())
 }
 
-/// Initializes a Git repository under the rot config directory. This must be called
+/// Initializes a Git repository under the tittle config directory. This must be called
 /// before any other functions from `git::*` are called.
 pub fn init() -> Result<()> {
-  if !config::rot_config_dir().join(".git").exists() {
+  if !config::tittle_config_dir().join(".git").exists() {
     let output = Command::new("git")
       .arg("-C")
-      .arg(config::rot_config_dir())
+      .arg(config::tittle_config_dir())
       .arg("init")
       .output()?;
 

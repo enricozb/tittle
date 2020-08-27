@@ -1,13 +1,13 @@
-= Rot - Templates
+= Templates
 
-Rot templates are a way to templatize your configuration files. Rot supports a very
-simple syntax to allow for substitution of variables in a configuration file that is
-machine and user dependent.
+Tittle templates are a way to templatize your configuration files. Tittle supports
+a very simple syntax to allow for substitution of variables in a configuration file
+that is machine and user dependent.
 
 == Syntax
 
 Variables in template files are surrounded by double braces `{{...}}`, and should only
-contain alphanumeric characters. To provide a value for a variable, run `rot edit me`
+contain alphanumeric characters. To provide a value for a variable, run `tittle edit me`
 and add an entry into the *vars* map.
 
 == Example
@@ -39,13 +39,13 @@ is required in order for variable substitution to be applied.
 Now, we need to track this template and specify where it should render to, after
 variable substitution:
 ```
-rot track ~/.term.yml.template --name terminal --renders_to ~/.term.yml
+tittle track ~/.term.yml.template --name terminal --renders_to ~/.term.yml
 ```
 See <<commands#, commands>> for information on the *--name* argument. Lastly, we must
 specify the value of the `terminal_font_size` variable by editing the overrides
 specific to this user/machine:
 ```
-rot edit me
+tittle edit me
 ```
 This will open up this user/machine's overrides with `$EDITOR` (see the *edit* command
 in <<commands#, commands>> for details). We then need to add `terminal_font_size` to
@@ -59,10 +59,10 @@ the *vars* field:
   }
 }
 ```
-To specify the value on a different user/machine, run `rot edit me` from that
+To specify the value on a different user/machine, run `tittle edit me` from that
 user/machine. Lastly, to render the template to its location, do
 ```
-rot render
+tittle render
 ```
-which renders all templates. Rot will inform you if a template references a variable
+which renders all templates. Tittle will inform you if a template references a variable
 that is not defined for this user/machine.

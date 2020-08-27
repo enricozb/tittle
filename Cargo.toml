@@ -1,5 +1,5 @@
 [package]
-name = "rot-dot"
+name = "tittle"
 version = "0.1.0"
 authors = ["Enrico Borba <enricozb@gmail.com>"]
 edition = "2018"

@@ -70,8 +70,8 @@ pub fn remote_and_local_files<P: AsRef<Path>, Q: AsRef<Path>>(
   let remote = remote.as_ref();
   let local = local.as_ref();
 
-  let rot_config_dir = config::rot_config_dir();
-  let remote = &rot_config_dir.join(remote);
+  let tittle_config_dir = config::tittle_config_dir();
+  let remote = &tittle_config_dir.join(remote);
 
   if remote.is_file() {
     return Ok(vec![(remote.to_path_buf(), local.to_path_buf())]);

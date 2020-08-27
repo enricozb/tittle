@@ -6,7 +6,7 @@ use std::env;
 use std::fs::File;
 use std::process::Command;
 
-/// Edit portions of the `rot_config.json`, depending on `mode`.
+/// Edit portions of the `config.json`, depending on `mode`.
 ///
 /// # Arguments
 ///
@@ -17,7 +17,7 @@ pub fn edit(mode: Option<&str>) -> Result<()> {
   match mode {
     None => {
       Command::new(editor()?)
-        .arg(config::rot_config_file())
+        .arg(config::tittle_config_file())
         .status()?;
     }
     Some("me") => {
@@ -59,6 +59,6 @@ fn edit_machine() -> Result<()> {
 fn editor() -> Result<String> {
   match env::var("EDITOR") {
     Ok(editor) => Ok(editor),
-    Err(_) => return err::err("Please set an $EDITOR to edit the rot config."),
+    Err(_) => return err::err("Please set an $EDITOR to edit the tittle config."),
   }
 }

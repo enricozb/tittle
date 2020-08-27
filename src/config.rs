@@ -27,7 +27,7 @@ pub struct OverrideConfig {
   vars: HashMap<String, String>,
 }
 
-/// A struct representing the JSON in `rot_config.json`.
+/// A struct representing the JSON in `config.json`.
 ///
 /// # Fields
 ///
@@ -133,37 +133,28 @@ fn update_hash_map(
     .collect()
 }
 
-/// Returns the path of the user's config directory.
-pub fn user_config_dir() -> path::PathBuf {
-  if let Ok(user_config_dir) = env::var("XDG_CONFIG_HOME") {
-    return Path::new(&user_config_dir).to_path_buf();
-  }
-
-  Path::new(&env::var("HOME").unwrap()).join(".config")
+/// Returns the path of the tittle directory.
+pub fn tittle_config_dir() -> path::PathBuf {
+  Path::new(&env::var("HOME").unwrap()).join(".tittle")
 }
 
-/// Returns the path of the rot directory.
-pub fn rot_config_dir() -> path::PathBuf {
-  user_config_dir().join("rot")
+/// Returns the path of the tittle_cofig.json file.
+pub fn tittle_config_file() -> path::PathBuf {
+  tittle_config_dir().join("config.json")
 }
 
-/// Returns the path of the rot_cofig.json file.
-pub fn rot_config_file() -> path::PathBuf {
-  rot_config_dir().join("rot_config.json")
-}
-
-/// Create the directory under `rot_config_dir()` if it doesn't exist.
+/// Create the directory under `tittle_config_dir()` if it doesn't exist.
 fn create_config_dir_if_not_exists() -> Result<()> {
-  let rot_config_dir = rot_config_dir();
-  if !rot_config_dir.exists() {
-    fs::create_dir(&rot_config_dir)?;
+  let tittle_config_dir = tittle_config_dir();
+  if !tittle_config_dir.exists() {
+    fs::create_dir(&tittle_config_dir)?;
   }
   Ok(())
 }
 
-/// Create the `rot_config.json` and initialize it if it doesn't exist.
+/// Create the `config.json` and initialize it if it doesn't exist.
 fn create_config_if_not_exists() -> Result<()> {
-  let config_file = rot_config_file();
+  let config_file = tittle_config_file();
   if !config_file.exists() {
     let config = Config {
       repo: None,
@@ -184,24 +175,24 @@ fn create_config_if_not_exists() -> Result<()> {
   Ok(())
 }
 
-/// Initializes rot config directory and file. This must be called before any other
+/// Initializes tittle config directory and file. This must be called before any other
 /// functions from `config::*` are called.
 pub fn init() -> Result<()> {
   create_config_dir_if_not_exists()?;
   create_config_if_not_exists()
 }
 
-/// Returns the Config struct representing `rot_config.json`.
+/// Returns the Config struct representing `config.json`.
 pub fn get_config() -> Result<Config> {
   let config: Config =
-    serde_json::from_str(&fs::read_to_string(rot_config_file()).unwrap())?;
+    serde_json::from_str(&fs::read_to_string(tittle_config_file()).unwrap())?;
 
   Ok(config)
 }
 
-/// Saves the config `config` to `rot_config.json`.
+/// Saves the config `config` to `config.json`.
 pub fn write_config(config: &Config) -> Result<()> {
-  let config_file = rot_config_file();
+  let config_file = tittle_config_file();
   writeln!(
     fs::File::create(&config_file)?,
     "{}",

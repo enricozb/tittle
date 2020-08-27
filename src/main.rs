@@ -8,7 +8,7 @@ mod git;
 mod util;
 
 fn main() {
-  let matches = App::new("rot")
+  let matches = App::new("tittle")
     .version("0.0.1")
     .author("Enrico Z. Borba <enricozb@gmail.com>")
     .about("Dotfile manager")
@@ -26,7 +26,7 @@ fn main() {
     )
     .subcommand(
       SubCommand::with_name("edit")
-        .about("Edit the rot config")
+        .about("Edit the tittle config")
         .arg(
           Arg::with_name("MODE")
             .help("One of [me]. Specifies which portion of the config to edit.")

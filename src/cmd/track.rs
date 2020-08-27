@@ -44,7 +44,7 @@ fn infer_name<P: AsRef<Path>>(path: &P, name: Option<&str>) -> Option<String> {
 fn copy<P: AsRef<Path>>(path: P, name: &str) -> Result<()> {
   let path = path.as_ref();
 
-  let dest = config::rot_config_dir().join(name);
+  let dest = config::tittle_config_dir().join(name);
 
   if path.is_dir() {
     util::copy_dir(path, dest)?;
