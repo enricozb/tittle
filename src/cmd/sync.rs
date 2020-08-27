@@ -3,7 +3,7 @@ use crate::{config, git};
 
 use anyhow::Result;
 use std::cmp::max;
-use std::fs;
+use std::{fs, env};
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 use walkdir::WalkDir;
@@ -51,6 +51,8 @@ pub fn sync() -> Result<()> {
       ));
     }
   }
+
+  git::commit(&env::args().collect::<Vec<String>>()[1..].join(" "))?;
 
   Ok(())
 }

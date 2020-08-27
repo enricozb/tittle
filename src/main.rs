@@ -1,6 +1,5 @@
 use anyhow::Result;
 use clap::{App, AppSettings, Arg, SubCommand};
-use std::env;
 
 mod cmd;
 mod config;
@@ -33,6 +32,14 @@ fn main() {
             .help("One of [me]. Specifies which portion of the config to edit.")
             .index(1),
         ),
+    )
+    .subcommand(
+      SubCommand::with_name("pull")
+        .about("Pulls the repository from upstream"),
+    )
+    .subcommand(
+      SubCommand::with_name("push")
+        .about("Pushes the current repository upstream"),
     )
     .subcommand(
       SubCommand::with_name("render")
@@ -87,6 +94,9 @@ fn main() {
 
       ("edit", Some(matches)) => cmd::edit::edit(matches.value_of("MODE"))?,
 
+      ("pull", _) => git::pull()?,
+      ("push", _) => git::push()?,
+
       ("render", _) => cmd::render::render()?,
 
       ("repo", Some(matches)) => cmd::repo::repo(matches.value_of("URL").unwrap())?,
@@ -103,8 +113,6 @@ fn main() {
 
       _ => {}
     }
-
-    git::commit(&env::args().collect::<Vec<String>>()[1..].join(" "))?;
 
     Ok(())
   };
