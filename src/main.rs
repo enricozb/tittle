@@ -22,29 +22,38 @@ fn main() {
     )
     .subcommand(
       SubCommand::with_name("diff").about(
-        "show diffs between remote and local dotfiles. Uses colordiff if available",
+        "Show diffs between remote and local dotfiles. Uses colordiff if available",
       ),
     )
     .subcommand(
+      SubCommand::with_name("edit")
+        .about("Edit the rot config")
+        .arg(
+          Arg::with_name("MODE")
+            .help("One of [me]. Specifies which portion of the config to edit.")
+            .index(1),
+        ),
+    )
+    .subcommand(
       SubCommand::with_name("render")
-        .about("render templates to their respective locations"),
+        .about("Render templates to their respective locations"),
     )
     .subcommand(
       SubCommand::with_name("repo")
-        .about("sets the upstream dotfile repo")
+        .about("Sets the upstream dotfile repo")
         .arg(
           Arg::with_name("URL")
-            .help("the upstream repo url")
+            .help("The upstream repo url")
             .required(true)
             .index(1),
         ),
     )
     .subcommand(
-      SubCommand::with_name("sync").about("sync between remote and local dotfiles"),
+      SubCommand::with_name("sync").about("Sync between remote and local dotfiles"),
     )
     .subcommand(
       SubCommand::with_name("track")
-        .about("track a file or directory")
+        .about("Track a file or directory")
         .arg(
           Arg::with_name("name")
             .short("n")
@@ -61,12 +70,12 @@ fn main() {
         )
         .arg(
           Arg::with_name("PATH")
-            .help("the path to track")
+            .help("The path to track")
             .required(true)
             .index(1),
         ),
     )
-    .subcommand(SubCommand::with_name("tree").about("show a tree of the tracked files"))
+    .subcommand(SubCommand::with_name("tree").about("Show a tree of the tracked files"))
     .get_matches();
 
   let run = || -> Result<()> {
@@ -75,6 +84,8 @@ fn main() {
 
     match matches.subcommand() {
       ("diff", _) => cmd::diff::diff()?,
+
+      ("edit", Some(matches)) => cmd::edit::edit(matches.value_of("MODE"))?,
 
       ("render", _) => cmd::render::render()?,
 

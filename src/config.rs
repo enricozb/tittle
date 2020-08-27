@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 /// * `templates` - A map from remote template paths to their location after rendering,
 ///                 overriding the default `templates` map.
 /// * `vars` - A map from variable names to values, used for template rendering.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct OverrideConfig {
   dest: HashMap<String, String>,
   templates: HashMap<String, String>,
@@ -47,12 +47,16 @@ pub struct Config {
 impl Config {
   pub fn dest<S: Into<String>>(&self, remote: S) -> String {
     let remote = remote.into();
-
+    let default_local = &self.dest[&remote];
     match util::machine_id() {
-      Err(_) => self.dest[&remote].clone(),
+      Err(_) => default_local.clone(),
       Ok(machine_id) => match self.overrides.get(&machine_id) {
-        None => self.dest[&remote].clone(),
-        Some(override_config) => override_config.dest[&remote].clone(),
+        None => default_local.clone(),
+        Some(override_config) => override_config
+          .dest
+          .get(&remote)
+          .unwrap_or(default_local)
+          .clone(),
       },
     }
   }
@@ -95,14 +99,27 @@ impl Config {
     self.dest.contains_key(&remote.into())
   }
 
-  pub fn vars(&self) -> HashMap<String, String> {
+  pub fn my_overrides(&self) -> OverrideConfig {
+    let empty = OverrideConfig {
+      dest: HashMap::new(),
+      templates: HashMap::new(),
+      vars: HashMap::new(),
+    };
+
     match util::machine_id() {
-      Err(_) => HashMap::new(),
-      Ok(machine_id) => match self.overrides.get(&machine_id) {
-        None => HashMap::new(),
-        Some(override_config) => override_config.vars.clone(),
-      },
+      Err(_) => empty.clone(),
+      Ok(machine_id) => self.overrides.get(&machine_id).unwrap_or(&empty).clone(),
     }
+  }
+
+  pub fn set_my_overrides(&mut self, override_config: OverrideConfig) -> Result<()> {
+    let machine_id = util::machine_id()?;
+    self.overrides.insert(machine_id, override_config);
+    Ok(())
+  }
+
+  pub fn vars(&self) -> HashMap<String, String> {
+    self.my_overrides().vars
   }
 }
 
@@ -131,7 +148,7 @@ pub fn rot_config_dir() -> path::PathBuf {
 }
 
 /// Returns the path of the rot_cofig.json file.
-fn rot_config_file() -> path::PathBuf {
+pub fn rot_config_file() -> path::PathBuf {
   rot_config_dir().join("rot_config.json")
 }
 

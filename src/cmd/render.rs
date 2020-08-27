@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::path::Path;
 
+/// Render a template to its location given the replacement variables.
 fn render_template<P: AsRef<Path>, Q: AsRef<Path>>(
   template: P,
   render_to: Q,
@@ -33,6 +34,7 @@ fn render_template<P: AsRef<Path>, Q: AsRef<Path>>(
   Ok(())
 }
 
+/// Render all local templates to their location.
 pub fn render() -> Result<()> {
   let config = config::get_config()?;
   let vars = config.vars();
