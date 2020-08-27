@@ -2,6 +2,12 @@
 name = "tittle"
 version = "0.1.0"
 authors = ["Enrico Borba <enricozb@gmail.com>"]
+description = "Dotfile manager"
+homepage = "https://github.com/enricozb/tittle"
+documentation = "https://github.com/enricozb/tittle"
+repository = "https://github.com/enricozb/tittle"
+license-file = "LICENSE"
+readme = "README.md"
 edition = "2018"
 
 [dependencies]
