@@ -1,8 +1,8 @@
 use crate::util::{self, color};
-use crate::{config, err};
+use crate::{config, err, git};
 
 use anyhow::Result;
-use std::{fs, path::Path};
+use std::{env, fs, path::Path};
 
 /// Returns a remote name given a local `path`.
 fn infer_name_from_path<P: AsRef<Path>>(path: &P) -> Option<&std::ffi::OsStr> {
@@ -50,7 +50,7 @@ fn copy<P: AsRef<Path>>(path: P, name: &str) -> Result<()> {
     util::copy_dir(path, dest)?;
   } else {
     if !dest.parent().unwrap().exists() {
-      fs::create_dir(&dest.parent().unwrap())?;
+      fs::create_dir_all(&dest.parent().unwrap())?;
     }
     fs::copy(path, dest)?;
   }
@@ -126,5 +126,7 @@ pub fn track<P: AsRef<Path>, Q: AsRef<Path>>(
     ));
   }
 
-  config::write_config(&config)
+  config::write_config(&config)?;
+
+  git::commit(&env::args().collect::<Vec<String>>()[1..].join(" "))
 }
