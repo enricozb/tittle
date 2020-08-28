@@ -41,9 +41,9 @@ variable substitution:
 ```
 tittle track ~/.term.yml.template --name terminal --renders_to ~/.term.yml
 ```
-See <<commands#, commands>> for information on the *--name* argument. Lastly, we must
-specify the value of the `terminal_font_size` variable by editing the overrides
-specific to this user/machine:
+See <<commands#, commands>>, and <<tracking#, tracking>> for information on the
+*--name* argument. Lastly, we must specify the value of the `terminal_font_size`
+variable by editing the overrides specific to this user/machine:
 ```
 tittle edit me
 ```

@@ -6,6 +6,7 @@
   - doesn't remove local files
 
 - tracking a file in a directory that was already tracked
+
 - the *dest* field in the config should allow for some variables
 ```
 {
@@ -14,5 +15,8 @@
 ```
 - add `tittle edit a@b` to edit a specific machine's overrides.
 
+- adding new files under a tracked directory is not detected?
+  - walk each directory independently.
 
+## Maybe Done
 - tracking a file or directory with a deep name: `tittle track x -n a/b/c`

@@ -49,10 +49,11 @@ This is an exhaustive list of commands that tittle accepts with `tittle <command
   `tittle sync` replaces older file with the newer one, if a difference exists.
 
 *track* <path> [--name <name>] [--renders_to <file>]::
-  Track a file or a directory. Tracked files are never stored at the root of the tittle
-  repository, they are each under at least one directory. The name of this directory
-  is the basename of *<path>* if path is a directory. Otherwise, it must be specified
-  through *--name*. *track* has different behavior depending on the value of *<path>*:
+  Track a file or a directory. See <<tracking#, tracking>> for more details.  Tracked
+  files are never stored at the root of the tittle repository, they are each under
+  at least one directory. The name of this directory is the basename of *<path>*
+  if path is a directory. Otherwise, it must be specified through *--name*. *track*
+  has different behavior depending on the value of *<path>*:
 
   If *<path>* is a directory:::
     The entire directory and all of its contents are tracked.

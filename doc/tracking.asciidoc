@@ -1,0 +1,95 @@
+= Tracking
+
+== Names
+
+Tittle lets you track configuration files under a simple directory structure.
+Each file/directory that is tracked lives under a *name* within the tittle root
+directory. For example, if I run the following three commands:
+```
+> tittle track ~/.config/i3                     # i3 is a directory
+> tittle track ~/.tmux.conf --name tmux         # .tmux.conf is a file
+> tittle track ~/.config/mpv --name media/mpv   # mpv is a directory
+```
+Then, the output of `tittle tree` would look like:
+```
+/home/enricozb/.tittle
+├── config.json
+├── i3
+│   ├── config
+│   └── lock.sh
+├── tmux
+│   └── .tmux.conf
+└── media
+    └── mpv
+        └── scripts
+            └── mpris.so
+
+```
+Since `~/.config/i3` is a directory, it gets copied to the root of the tittle tree.
+However, since `~/.tmux.conf` is a file, we _must_ give it a name, so it can be under
+a directory at the root of the tittle tree. Since we gave the argument `--name tmux`,
+it now resides under a directory named `tmux`. Lastly, even though
+`~/.config/mpv` is a directory, we can still rename it, and even give it a
+<<nested-names, nested name>>.
+
+=== Nested Names
+
+Nested names are useful for organizing different configuration files under same
+directory in the tittle tree. Including `/` in the argument passed to *--name* results
+in a nested name. For example,
+```
+tittle track ~/.config/mpv --name media/mpv
+```
+An example use case would be to have all of your configuration files for media live
+under the same directory at the root of the tittle tree:
+```
+tittle track ~/.config/mpv --name media/mpv
+tittle track ~/.config/vlc --name media/vlc
+tittle track ~/.config/calibre --name media/calibre
+```
+
+== Tracking Only Specific Files In a Directory
+
+Often times there are multiple configuration files you want to track that all live
+locally under the same directory, but you don't want to track the entire directory.
+For example, the https://fishshell.com/[fish shell] configuration files live under
+`~/.config/fish`. There are several files and directories in there, but I only want
+to track `~/.config/fish/config.fish` and `~/.config/fish/conf.d/fzf/fish`. In that
+case, I can do
+```
+> tittle track ~/.config/fish/config.fish --name fish
+> tittle track ~/.config/fish/conf.d/fzf.fish --name fish
+```
+In this case, the `tittle tree` would look like:
+```
+/home/enricozb/.tittle
+├── config.json
+└── fish
+    ├── config.fish
+    └── conf.d
+        └── fzf.fish
+
+```
+Tittle supports this use case by letting you use the same name for different _files_.
+However, different directories cannot use the same name.
+
+== Tracking Files And Directories Under The Same Name
+
+Continuing with the https://fishshell.com/[fish shell] example above, lets say that
+I want to track the entire `conf.d` directory, and `config.fish`. Then, I can do:
+
+```
+> tittle track ~/.config/fish/config.fish --name fish
+> tittle track ~/.config/fish/conf.d --name fish
+```
+And now, the `tittle tree` would look like:
+```
+/home/enricozb/.tittle
+├── config.json
+└── fish
+    ├── config.fish
+    └── conf.d
+        └── fzf.fish
+        └── fzf_key_bindings.fish
+
+```

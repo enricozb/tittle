@@ -21,6 +21,7 @@ cargo install tittle
   - [commands](doc/commands.asciidoc): for info on the commands that tittle accepts.
   - [config](doc/config.asciidoc): for the tittle config specification.
   - [templates](doc/templates.asciidoc): for how to use templates and variables.
+  - [tracking](doc/tracking.asciidoc): for info on how to use `tittle track`.
 
 ## Terminology
 Throughout the codebase and this document the terms *remote* and *local* appear often.
