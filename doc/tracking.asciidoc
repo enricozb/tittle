@@ -93,3 +93,8 @@ And now, the `tittle tree` would look like:
         └── fzf_key_bindings.fish
 
 ```
+
+== Templates
+
+The *track* command also supports adding templates with the *--renders_to* argument.
+See <<templates#, templates>> for details.
