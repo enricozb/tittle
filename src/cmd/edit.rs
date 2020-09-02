@@ -56,7 +56,7 @@ fn edit_machine() -> Result<()> {
 }
 
 /// Returns this machine's `$EDITOR`.
-fn editor() -> Result<String> {
+pub fn editor() -> Result<String> {
   match env::var("EDITOR") {
     Ok(editor) => Ok(editor),
     Err(_) => return err::err("Please set an $EDITOR to edit the tittle config."),

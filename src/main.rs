@@ -42,6 +42,10 @@ fn main() {
         .about("Pushes the current repository upstream"),
     )
     .subcommand(
+      SubCommand::with_name("remove")
+        .about("Remove tracked files or directories")
+    )
+    .subcommand(
       SubCommand::with_name("render")
         .about("Render templates to their respective locations"),
     )
@@ -96,6 +100,8 @@ fn main() {
 
       ("pull", _) => git::pull()?,
       ("push", _) => git::push()?,
+
+      ("remove", _) => cmd::remove::remove()?,
 
       ("render", _) => cmd::render::render()?,
 
