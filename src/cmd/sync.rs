@@ -36,11 +36,9 @@ pub fn sync() -> Result<()> {
 
     for (remote_file, local_file) in files.iter() {
       let arrow_str = if direction == FromRemote {
-        println!("copy {} {}", remote_file.display(), local_file.display());
         fs::copy(remote_file, local_file)?;
         "->"
       } else {
-        println!("copy {} {}", local_file.display(), remote_file.display());
         fs::copy(local_file, remote_file)?;
         "<-"
       };

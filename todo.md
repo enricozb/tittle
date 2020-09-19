@@ -1,5 +1,14 @@
 # T0D0
 
+## Bugs
+- `tittle sync` fails if a destination is in a deep-nonexistent directory
+  - create parent directory of destination.
+
+- `tittle edit` doesn't generate a commit after edit.
+
+## Features
+- commits should reference the machine ID that made them.
+
 - add a remove
   - maybe similar to edit where we see only the destinations, and we remove the
     ones we don't want to track.
