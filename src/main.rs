@@ -46,9 +46,7 @@ fn main() {
             .index(1),
         ),
     )
-    .subcommand(
-      SubCommand::with_name("pull").about("Pulls the repository from upstream")
-    )
+    .subcommand(SubCommand::with_name("pull").about("Pulls the repository from upstream"))
     .subcommand(
       SubCommand::with_name("push").about("Pushes the current repository upstream"),
     )
@@ -100,12 +98,16 @@ fn main() {
     .get_matches();
 
   let run = || -> Result<()> {
+    // when cloning, don't initialize config and git first
+    if let ("clone", Some(matches)) = matches.subcommand() {
+      git::clone(matches.value_of("URL").unwrap())?;
+      return Ok(());
+    }
+
     config::init()?;
     git::init()?;
 
     match matches.subcommand() {
-      ("clone", Some(matches)) => git::clone(matches.value_of("URL").unwrap())?,
-
       ("diff", _) => cmd::diff::diff()?,
 
       ("edit", Some(matches)) => cmd::edit::edit(matches.value_of("MODE"))?,
