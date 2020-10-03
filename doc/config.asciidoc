@@ -5,7 +5,6 @@ This is a specification of the tittle JSON config, accessed with `tittle edit`.
 The default tittle config is
 ```
 {
-  "repo": null,
   "dest": {},
   "overrides": {},
   "templates": {}
@@ -14,7 +13,6 @@ The default tittle config is
 and a more mature config looks like
 ```
 {
-  "repo": "git@github.com:enricozb/dotfiles",
   "dest": {
     "rofi/config.rasi.template": "/home/enricozb/.config/rofi/config.rasi.template",
     "i3/config.template": "/home/enricozb/.config/i3/config.template",
@@ -40,9 +38,6 @@ and a more mature config looks like
 ```
 
 == Fields
-
-*repo* (`null`|`string`)::
-  The url to the upstream repository.
 
 *dest* (`Map<string, string>`)::
   Relates remote tracked files and their default location on the user's filesystem.

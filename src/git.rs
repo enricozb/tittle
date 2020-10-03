@@ -22,7 +22,21 @@ pub fn timestamp<P: AsRef<Path>>(path: P) -> Result<u64> {
   )
 }
 
-pub fn add_remote(url: &str) -> Result<()> {
+fn has_remote() -> Result<bool> {
+  Ok(
+    Command::new("git")
+      .arg("-C")
+      .arg(config::tittle_config_dir())
+      .args(&["remote", "-v"])
+      .output()?
+      .stdout
+      .len()
+      != 0,
+  )
+}
+
+/// Sets the url as the upstream repository.
+pub fn set_remote(url: &str) -> Result<()> {
   let status = Command::new("git")
     .arg("-C")
     .arg(config::tittle_config_dir())
@@ -38,7 +52,7 @@ pub fn add_remote(url: &str) -> Result<()> {
 
 /// Execute a git command.
 fn git_cmd(cmd: &[&str]) -> Result<()> {
-  if None == config::get_config()?.repo {
+  if !has_remote()? {
     return err::err("Attempting git command without existing repo.");
   }
 

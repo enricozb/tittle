@@ -37,7 +37,7 @@ This is an exhaustive list of commands that tittle accepts with `tittle <command
 
 *repo* <url>::
   Sets the upstream dotfile repo to *<url>*. No validation of the url is done, so if
-  the url is invalid, then `repo pull` and `repo push` will fail.
+  the url is invalid, then `tittle pull` and `tittle push` will fail.
 
 *sync*::
   Synchronize the remote and local dotfiles. This has different behavior depending on

@@ -117,7 +117,7 @@ fn main() {
 
       ("render", _) => cmd::render::render()?,
 
-      ("repo", Some(matches)) => cmd::repo::repo(matches.value_of("URL").unwrap())?,
+      ("repo", Some(matches)) => git::set_remote(matches.value_of("URL").unwrap())?,
 
       ("sync", _) => cmd::sync::sync()?,
 

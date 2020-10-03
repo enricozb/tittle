@@ -31,14 +31,12 @@ pub struct OverrideConfig {
 ///
 /// # Fields
 ///
-/// * `repo` - The url, if any, to the upstream repository of the dotfiles.
 /// * `overrides` - A map from a machine-id to an OverrideConfig.
 /// * `dest` - A map of remote paths to local paths, describing where each dotfile
 ///            or directory is stored on the local filesystem.
 /// * `templates` - A map from remote template paths to their location after rendering.
 #[derive(Serialize, Deserialize)]
 pub struct Config {
-  pub repo: Option<String>,
   dest: HashMap<String, String>,
   overrides: HashMap<String, OverrideConfig>,
   templates: HashMap<String, String>,
@@ -157,7 +155,6 @@ fn create_config_if_not_exists() -> Result<()> {
   let config_file = tittle_config_file();
   if !config_file.exists() {
     let config = Config {
-      repo: None,
       dest: HashMap::new(),
       overrides: HashMap::new(),
       templates: HashMap::new(),

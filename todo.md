@@ -6,9 +6,6 @@
 
 - `tittle edit` doesn't generate a commit after edit.
 
-## Debt
-- remove `repo` field from `config.json` and let the git repository handle it.
-
 ## Features
 - add readme on initialization referencing tittle
 
