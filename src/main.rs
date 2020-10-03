@@ -104,7 +104,7 @@ fn main() {
     git::init()?;
 
     match matches.subcommand() {
-      ("clone", _) => git::clone(matches.value_of("URL").unwrap())?,
+      ("clone", Some(matches)) => git::clone(matches.value_of("URL").unwrap())?,
 
       ("diff", _) => cmd::diff::diff()?,
 
