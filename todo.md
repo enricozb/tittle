@@ -1,9 +1,6 @@
 # T0D0
 
 ## Bugs
-- `tittle sync` fails if a destination is in a deep-nonexistent directory
-  - create parent directory of destination.
-
 - `tittle edit` doesn't generate a commit after edit.
 
 ## Features

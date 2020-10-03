@@ -3,9 +3,9 @@ use crate::{config, git};
 
 use anyhow::Result;
 use std::cmp::max;
-use std::{fs, env};
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
+use std::{env, fs};
 use walkdir::WalkDir;
 
 /// Represents which direction to sync dotfiles.
@@ -36,6 +36,13 @@ pub fn sync() -> Result<()> {
 
     for (remote_file, local_file) in files.iter() {
       let arrow_str = if direction == FromRemote {
+        if !local_file
+          .parent()
+          .expect(&format!("Local path has no parent {:?}", local_file))
+          .is_dir()
+        {
+          fs::create_dir_all(local_file.parent().unwrap())?
+        }
         fs::copy(remote_file, local_file)?;
         "->"
       } else {
