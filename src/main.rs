@@ -20,6 +20,19 @@ fn main() {
         .help("Print commands as they are run"),
     )
     .subcommand(
+      SubCommand::with_name("clone")
+        .about(
+          "Clone a dotfile repository. This cannot be run if any local dotfile \
+         repo already exists.",
+        )
+        .arg(
+          Arg::with_name("URL")
+            .help("The upstream repo url")
+            .required(true)
+            .index(1),
+        ),
+    )
+    .subcommand(
       SubCommand::with_name("diff").about(
         "Show diffs between remote and local dotfiles. Uses colordiff if available",
       ),
@@ -34,16 +47,13 @@ fn main() {
         ),
     )
     .subcommand(
-      SubCommand::with_name("pull")
-        .about("Pulls the repository from upstream"),
+      SubCommand::with_name("pull").about("Pulls the repository from upstream")
     )
     .subcommand(
-      SubCommand::with_name("push")
-        .about("Pushes the current repository upstream"),
+      SubCommand::with_name("push").about("Pushes the current repository upstream"),
     )
     .subcommand(
-      SubCommand::with_name("remove")
-        .about("Remove tracked files or directories")
+      SubCommand::with_name("remove").about("Remove tracked files or directories"),
     )
     .subcommand(
       SubCommand::with_name("render")
@@ -94,6 +104,8 @@ fn main() {
     git::init()?;
 
     match matches.subcommand() {
+      ("clone", _) => git::clone(matches.value_of("URL").unwrap())?,
+
       ("diff", _) => cmd::diff::diff()?,
 
       ("edit", Some(matches)) => cmd::edit::edit(matches.value_of("MODE"))?,

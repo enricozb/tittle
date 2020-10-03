@@ -4,6 +4,10 @@ This is an exhaustive list of commands that tittle accepts with `tittle <command
 
 == Commands
 
+*clone* <url>::
+  Clone a remote dotfile repo managed by tittle. Your local tittle setup will not
+  function properly unless this remote repository is managed by tittle.
+
 *diff*::
   Show any diffs between remote and local dotfiles, using `colordiff(1)` if available.
 

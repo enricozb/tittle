@@ -4,11 +4,16 @@ Tittle tracks your dotfiles under version control and supports fine-grained
 user/machine-specific configuration.
 
 ## Quick Start
+You can start your own tittle-managed dotfile repo like so:
 ```
 > tittle track ~/.config/i3
 INFO: tracking /home/enricozb/.config/i3 under i3
 > tittle repo git@github.com:enricozb/dotfiles
 > tittle push
+```
+You can also clone an existing one with:
+```
+> tittle clone https://github.com/enricozb/dotfiles
 ```
 
 ## Install

@@ -22,7 +22,6 @@ pub fn timestamp<P: AsRef<Path>>(path: P) -> Result<u64> {
   )
 }
 
-
 pub fn add_remote(url: &str) -> Result<()> {
   let status = Command::new("git")
     .arg("-C")
@@ -37,11 +36,10 @@ pub fn add_remote(url: &str) -> Result<()> {
   }
 }
 
-
-/// Execute a push|pull git command.
+/// Execute a git command.
 fn git_cmd(cmd: &[&str]) -> Result<()> {
   if None == config::get_config()?.repo {
-    return Ok(());
+    return err::err("Attempting git command without existing repo.");
   }
 
   let status = Command::new("git")
@@ -54,6 +52,28 @@ fn git_cmd(cmd: &[&str]) -> Result<()> {
     Ok(())
   } else {
     err::err("git error")
+  }
+}
+
+/// Clones an existing tittle directory
+pub fn clone(url: &str) -> Result<()> {
+  if config::tittle_config_dir().is_dir() {
+    return err::err(
+      "Can't clone remote dotfile repository if local \
+      repository already exists. Delete ~/.tittle first.",
+    );
+  }
+
+  let output = Command::new("git")
+    .args(&["clone", url])
+    .arg(config::tittle_config_dir())
+    .output()?;
+
+  if output.status.success() {
+    Ok(())
+  } else {
+    util::error(String::from_utf8(output.stderr)?.trim());
+    err::err("Couldn't clone repo.")
   }
 }
 

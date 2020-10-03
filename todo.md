@@ -6,7 +6,14 @@
 
 - `tittle edit` doesn't generate a commit after edit.
 
+## Debt
+- remove `repo` field from `config.json` and let the git repository handle it.
+
 ## Features
+- add readme on initialization referencing tittle
+
+- add a commit message option
+
 - commits should reference the machine ID that made them.
 
 - add a remove
@@ -29,3 +36,4 @@
 
 ## Maybe Done
 - tracking a file or directory with a deep name: `tittle track x -n a/b/c`
+- added `clone` command.
