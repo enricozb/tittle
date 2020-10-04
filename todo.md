@@ -1,5 +1,8 @@
 # T0D0
 
+## Bugs
+- config sorts keys randomly, they should be sorted alphabetically on serialization
+
 ## Features
 - add readme on initialization referencing tittle
 
