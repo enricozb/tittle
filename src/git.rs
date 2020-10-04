@@ -111,7 +111,7 @@ pub fn commit(msg: &str) -> Result<()> {
   Command::new("git")
     .arg("-C")
     .arg(config::tittle_config_dir())
-    .args(&["commit", "-m", msg])
+    .args(&["commit", "-m", &format!("{}: {}", util::machine_id()?, msg)])
     .output()?;
 
   Ok(())
