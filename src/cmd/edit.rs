@@ -1,5 +1,5 @@
 use crate::util::{self, color};
-use crate::{config, err};
+use crate::{config, err, git};
 
 use anyhow::Result;
 use std::env;
@@ -27,6 +27,8 @@ pub fn edit(mode: Option<&str>) -> Result<()> {
       return err::err(format!("Invalid edit mode {}", color::emphasis(mode)))
     }
   };
+
+  git::commit(&env::args().collect::<Vec<String>>()[1..].join(" "))?;
 
   Ok(())
 }
