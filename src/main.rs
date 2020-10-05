@@ -9,7 +9,7 @@ mod util;
 
 fn main() {
   let matches = App::new("tittle")
-    .version("0.1.3")
+    .version("0.2.0")
     .author("Enrico Z. Borba <enricozb@gmail.com>")
     .about("Dotfile manager")
     .setting(AppSettings::VersionlessSubcommands)
